@@ -51,12 +51,26 @@ public sealed class BlockCell : MonoBehaviour
     private void Awake()
     {
         ApplyVisual();
-        BlockManager.Instance.RegisterCell(this);
+
+        // Only register if BlockManager exists
+        var bm = BlockManager.Instance;
+        if (bm != null)
+            bm.RegisterCell(this);
     }
 
     private void OnDestroy()
     {
-        BlockManager.Instance.UnregisterCell(this);
+        // Stop any preview coroutine
+        if (_blinkCoroutine != null)
+        {
+            StopCoroutine(_blinkCoroutine);
+            _blinkCoroutine = null;
+        }
+
+        // Only unregister if BlockManager still exists (might be destroyed during shutdown)
+        var bm = BlockManager.Instance;
+        if (bm != null)
+            bm.UnregisterCell(this);
     }
 
     private void ApplyVisual()
@@ -79,7 +93,10 @@ public sealed class BlockCell : MonoBehaviour
             return;
         }
 
-        var sprite = BlockSpriteManager.Instance.GetSprite(_type);
+        var bsm = BlockSpriteManager.Instance;
+        if (bsm == null) return;
+
+        var sprite = bsm.GetSprite(_type);
         if (sprite != null)
         {
             _spriteRenderer.sprite = sprite;
@@ -225,7 +242,10 @@ public sealed class BlockCell : MonoBehaviour
     {
         if (_spriteRenderer == null) return;
 
-        var sprite = BlockSpriteManager.Instance.GetSprite(_previewType);
+        var bsm = BlockSpriteManager.Instance;
+        if (bsm == null) return;
+
+        var sprite = bsm.GetSprite(_previewType);
         if (sprite != null)
         {
             _spriteRenderer.sprite = sprite;
@@ -315,5 +335,45 @@ public sealed class BlockCell : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
+    }
+
+    public bool IsInCellXZ(Vector3 worldPos)
+    {
+        Vector3 localPos = transform.InverseTransformPoint(worldPos);
+        Vector3 half = transform.localScale * 0.5f;
+
+        return Mathf.Abs(localPos.x) <= half.x &&
+               Mathf.Abs(localPos.z) <= half.z;
+    }
+
+    public float GetDistanceXZ(Vector3 worldPos)
+    {
+        Vector3 localPos = transform.InverseTransformPoint(worldPos);
+        return new Vector2(localPos.x, localPos.z).magnitude;
+    }
+
+    public Vector3 GetForceDirectionXZ()
+    {
+        return _dir switch
+        {
+            BlockDirection.Up => Vector3.forward, // +Z
+            BlockDirection.Down => Vector3.back, // -Z
+            BlockDirection.Left => Vector3.left, // -X
+            BlockDirection.Right => Vector3.right, // +X
+            _ => Vector3.zero
+        };
+    }
+
+    public float GetBaseStrength()
+    {
+        return _type switch
+        {
+            BlockType.Arrow => 8f,
+            BlockType.DoubleArrow => 14f,
+            BlockType.Boost => 22f,
+            BlockType.Sink => -10f, // or handle as attraction separately?
+            BlockType.Source => 10f, // or handle as repulsion separately?
+            _ => 0f
+        };
     }
 }
