@@ -5,16 +5,25 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public sealed class BlockSpriteManager : MonoBehaviour
 {
-    [Serializable]
-    public struct Entry
-    {
-        public BlockType type;
-        public Sprite sprite;
+    public static BlockSpriteManager Instance {
+        get
+        {
+            if (_instance != null)
+                return _instance;
+            
+            _instance = FindFirstObjectByType<BlockSpriteManager>();
+            if (_instance != null)
+                return _instance;
+            
+            _instance = new GameObject("BlockSpriteManager").AddComponent<BlockSpriteManager>();
+            DontDestroyOnLoad(_instance.gameObject);
+            return _instance;
+        }
     }
 
-    [Header("Block Sprites")]
-    [SerializeField] private Entry[] _sprites;
-
+    private static BlockSpriteManager _instance;
+    
+    private BlockMapping _mapping;
     private Dictionary<BlockType, Sprite> _lookup;
 
     private void Awake()
@@ -31,12 +40,16 @@ public sealed class BlockSpriteManager : MonoBehaviour
 
     private void BuildLookup()
     {
+        if (_mapping == null)
+        {
+            _mapping = Resources.Load<BlockMapping>("BlockMapping");
+        }
         _lookup ??= new Dictionary<BlockType, Sprite>();
         _lookup.Clear();
 
-        for (int i = 0; i < _sprites.Length; i++)
+        for (int i = 0; i < _mapping.sprites.Count; i++)
         {
-            var e = _sprites[i];
+            var e = _mapping.sprites[i];
             if (e.type == BlockType.None || e.sprite == null)
                 continue;
 
