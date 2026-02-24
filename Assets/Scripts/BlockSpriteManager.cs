@@ -18,8 +18,8 @@ public sealed class BlockSpriteManager : MonoBehaviour
             if (_instance != null)
                 return _instance;
 
-            // Prevent re-creating the singleton during shutdown/after destroy.
-            if (_isShuttingDown)
+            // Prevent re-creating the singleton during shutdown/after destroy (only in play mode).
+            if (_isShuttingDown && Application.isPlaying)
                 return null;
 
             _instance = FindFirstObjectByType<BlockSpriteManager>();

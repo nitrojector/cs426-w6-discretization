@@ -3,7 +3,7 @@
 [RequireComponent(typeof(Rigidbody))]
 public class Ball : MonoBehaviour
 {
-    [SerializeField] private int influenceRadiusCells = 2; // check a 5x5 around the ball
+    [SerializeField] private int influenceRadiusCells = 3; // check a 5x5 around the ball
     [SerializeField] private float maxAccel = 30f; // clamp to avoid insanity
     [SerializeField] private AnimationCurve falloff = AnimationCurve.EaseInOut(0, 1, 1, 0);
 
