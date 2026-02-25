@@ -52,6 +52,9 @@ public sealed class BlockCell : MonoBehaviour
     {
         ApplyVisual();
 
+        // fix rotation for any cells that might have been rotated in the editor (since we want to control rotation via the sprite transform)
+        transform.rotation = Quaternion.identity;
+
         // Only register if BlockManager exists
         var bm = BlockManager.Instance;
         if (bm != null)
