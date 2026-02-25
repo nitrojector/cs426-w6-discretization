@@ -28,6 +28,7 @@ public class Ball : MonoBehaviour
 
             // Distance in XZ plane
             float d = cell.GetDistanceXZ(transform.position);
+            bool withinCell = cell.IsInCellXZ(transform.position);
 
             // Normalize distance: 0 at center, 1 at edge of influence (in world units)
             float maxDist = bm.CellSize * influenceRadiusCells; // expose CellSize or store locally
@@ -44,7 +45,13 @@ public class Ball : MonoBehaviour
             {
                 case BlockType.Arrow:
                 case BlockType.DoubleArrow:
+                    dir = cell.GetForceDirectionXZ();
+                    strength = cell.GetBaseStrength();
+                    totalAccel += dir * (strength * w);
+                    break;
+
                 case BlockType.Boost:
+                    if (!withinCell) break; // only boost if inside cell
                     dir = cell.GetForceDirectionXZ();
                     strength = cell.GetBaseStrength();
                     totalAccel += dir * (strength * w);
