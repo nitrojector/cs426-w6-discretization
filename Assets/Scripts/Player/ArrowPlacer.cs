@@ -20,6 +20,7 @@ namespace Player
 
         private void Update()
         {
+            ProcessInput();
             PlacementCheck();
 
             if (_scrollAction.triggered)
@@ -85,6 +86,19 @@ namespace Player
 
             cell = hit.collider.GetComponentInParent<BlockCell>();
             return cell != null;
+        }
+
+        private void ProcessInput()
+        {
+            if (Keyboard.current.rKey.wasPressedThisFrame)
+            {
+                LevelManager.Instance?.ResetLevel();
+            }
+
+            if (Keyboard.current.escapeKey.wasPressedThisFrame)
+            {
+                Application.Quit();
+            }
         }
     }
 }

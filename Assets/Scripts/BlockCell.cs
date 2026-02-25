@@ -75,7 +75,11 @@ public sealed class BlockCell : MonoBehaviour
 
     private void ApplyVisual()
     {
-        if (_spriteRenderer == null) return;
+        if (_spriteRenderer == null)
+        {
+            Debug.LogWarning("BlockCell: No SpriteRenderer found for visual application.");
+            return;
+        }
 
         // Reset alpha to full opacity (important for cleaning up preview state)
         var color = _spriteRenderer.color;
